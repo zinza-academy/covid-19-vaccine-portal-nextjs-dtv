@@ -1,10 +1,20 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import type { TypedUseSelectorHook } from 'react-redux';
+import commonReducer from '@/lib/features/common/commonSlice';
+import authReducer from '@/lib/features/auth/authSlice';
+import { authApi } from '@/api/auth';
 
 export const makeStore = () => {
   return configureStore({
-    reducer: {}
+    reducer: {
+      common: commonReducer,
+      auth: authReducer,
+      [authApi.reducerPath]: authApi.reducer
+    },
+    middleware: (gDM) => {
+      return gDM().concat(authApi.middleware);
+    }
   });
 };
 

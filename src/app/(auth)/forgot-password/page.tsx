@@ -29,7 +29,7 @@ export default function ForgotPassword() {
     setIsSubmitting(true);
     await new Promise((resolve) => setTimeout(resolve, 2000));
     setIsSubmitting(false);
-    router.push('/auth/forgot-password');
+    router.push('/forgot-password');
   };
 
   return (
