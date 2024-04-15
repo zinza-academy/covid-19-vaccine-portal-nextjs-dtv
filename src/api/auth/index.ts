@@ -4,7 +4,7 @@ import { ILoginResponse, IUser, IUserLoginForm } from '@/types/auth';
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'base_url'
+    baseUrl: 'https://3448f108-a393-4277-845c-b962c2554126.mock.pstmn.io'
   }),
   endpoints: (builder) => ({
     login: builder.mutation<ILoginResponse, IUserLoginForm>({
