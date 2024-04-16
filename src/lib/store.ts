@@ -4,16 +4,18 @@ import type { TypedUseSelectorHook } from 'react-redux';
 import commonReducer from '@/lib/features/common/commonSlice';
 import authReducer from '@/lib/features/auth/authSlice';
 import { authApi } from '@/api/auth';
+import { addressApi } from '@/api/address';
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       common: commonReducer,
       auth: authReducer,
-      [authApi.reducerPath]: authApi.reducer
+      [authApi.reducerPath]: authApi.reducer,
+      [addressApi.reducerPath]: addressApi.reducer
     },
     middleware: (gDM) => {
-      return gDM().concat(authApi.middleware);
+      return gDM().concat(authApi.middleware).concat(addressApi.middleware);
     }
   });
 };

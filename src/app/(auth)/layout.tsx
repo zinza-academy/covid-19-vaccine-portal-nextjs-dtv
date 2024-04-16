@@ -25,7 +25,10 @@ export default function AuthLayout({
       </Box>
       <Box
         sx={{
-          flexBasis: '50%'
+          flexBasis: '50%',
+          height: '100vh',
+          maxHeight: '100vh',
+          overflowY: 'auto'
         }}
       >
         {children}
