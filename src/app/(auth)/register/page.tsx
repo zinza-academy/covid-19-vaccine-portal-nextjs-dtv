@@ -33,7 +33,7 @@ export default function LoginPage() {
     citizenID: yup
       .string()
       .required('Citizen ID is require')
-      .matches(/^\d{8}$|^\d{10}$/, 'Citizen ID must contain 8 or 10 digits'),
+      .matches(/^\d{9}$|^\d{12}$/, 'Citizen ID must contain 9 or 12 digits'),
     email: yup.string().email('Invalid email').required('Email is required'),
     password: yup
       .string()
