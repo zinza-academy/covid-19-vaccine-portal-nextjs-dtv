@@ -1,3 +1,4 @@
+import { Dayjs } from 'dayjs';
 export interface IForgotPasswordForm {
   email: string;
 }
@@ -15,4 +16,15 @@ export interface IUser {
   id: string;
   userName?: string;
   email: string;
+}
+export interface IUserRegisterForm {
+  citizenID: string;
+  email: string;
+  password: string;
+  fullName: string;
+  dateOfBirth: Dayjs;
+  gender: string;
+  province: string;
+  district: string;
+  ward: string;
 }
