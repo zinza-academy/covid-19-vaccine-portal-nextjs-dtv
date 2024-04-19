@@ -7,7 +7,7 @@ export interface IUserLoginForm {
   password: string;
 }
 export interface ILoginResponse {
-  id: string;
+  // id: string;
   token: string;
   email: string;
   userName: string;

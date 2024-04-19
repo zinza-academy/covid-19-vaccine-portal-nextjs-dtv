@@ -20,11 +20,7 @@ export default function LoginPage() {
       .string()
       .required('Password is require')
       .min(8, 'Password must be at least 8 characters')
-      .test(
-        'no-spaces',
-        'Password cannot contain spaces',
-        (value) => !value.includes(' ')
-      )
+      .test('no-spaces', 'Password cannot contain spaces', (value) => !value.includes(' '))
   });
   const {
     register,
@@ -38,12 +34,11 @@ export default function LoginPage() {
     },
     resolver: yupResolver(loginSchema)
   });
-  const [onLogin, { isLoading: isLoggingIn, error: loginError }] =
-    useLoginMutation();
+  const [onLogin, { isLoading: isLoggingIn, error: loginError }] = useLoginMutation();
 
   const onSubmit = async (values: IUserLoginForm) => {
     await onLogin(values);
-    router.push('/profile');
+    router.push('/');
   };
 
   return (
@@ -158,10 +153,7 @@ export default function LoginPage() {
             )} */}
           </Typography>
         </Box>
-        <Link
-          href={'/forgot-password'}
-          style={{ width: '100%', textDecoration: 'none' }}
-        >
+        <Link href={'/forgot-password'} style={{ width: '100%', textDecoration: 'none' }}>
           <Typography
             sx={{
               color: '#3949AB',
