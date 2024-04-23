@@ -21,6 +21,13 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/app/(mainPage)/(account)/vaccince-registration-result",
+    "src/app/(mainPage)/(account)/vaccine-registration-result"
+  ],
   "exclude": ["node_modules"]
 }

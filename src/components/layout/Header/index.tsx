@@ -21,11 +21,13 @@ const Header: FC = () => {
   const menuItems: IMenuItem[] = [
     {
       id: 1,
-      title: 'Trang chủ'
+      title: 'Trang chủ',
+      path: '/'
     },
     {
       id: 2,
-      title: 'Đăng ký tiêm'
+      title: 'Đăng ký tiêm',
+      path: '/vaccine-registration'
     },
     {
       id: 3,
@@ -36,6 +38,7 @@ const Header: FC = () => {
           id: 1,
           title: 'Tra cứu chứng nhận tiêm',
           subTitle: 'Cập nhật nhanh và chính xác nhất',
+          path: '/vaccine-certificate',
           leftIcon: (
             <Image src={'svg/user-group-cpurple.svg'} height={36} width={36} alt="userGroupIcon" />
           ),
@@ -45,6 +48,7 @@ const Header: FC = () => {
           id: 2,
           title: 'Tra cứu kết quả đăng ký',
           subTitle: 'Cập nhật nhanh và chính xác nhất',
+          path: '/vaccine-registration-result',
           leftIcon: (
             <Image src={'svg/user-group-cblue.svg'} height={36} width={36} alt="userGroupIcon" />
           ),
@@ -73,7 +77,6 @@ const Header: FC = () => {
           width="100%"
           justifyContent="space-between"
           alignItems="center"
-          px="36px"
         >
           <Stack direction="row" spacing={2} alignItems="center">
             <Image src={'svg/logo.svg'} alt="logo" width={42} height={50} />

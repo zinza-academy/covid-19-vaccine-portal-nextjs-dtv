@@ -8,7 +8,7 @@ export default function HomeLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <Stack spacing={4} direction="column" alignItems={'center'}>
+    <Stack direction="column" alignItems="center">
       <Header />
       <Box width="100%">{children}</Box>
       <Footer />
