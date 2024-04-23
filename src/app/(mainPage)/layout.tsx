@@ -1,6 +1,6 @@
 import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
-import { Box, Container, Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 
 export default function HomeLayout({
   children
@@ -10,7 +10,7 @@ export default function HomeLayout({
   return (
     <Stack spacing={4} direction="column" alignItems={'center'}>
       <Header />
-      <Container maxWidth="xl">{children}</Container>
+      <Box width="100%">{children}</Box>
       <Footer />
     </Stack>
   );
