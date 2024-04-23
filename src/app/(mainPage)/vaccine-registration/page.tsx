@@ -8,20 +8,24 @@ import React, { useState } from 'react';
 
 const steps = ['Thông tin cá nhân', 'Phiếu đồng ý tiêm', 'Hoàn thành'];
 
+enum Steps {
+  PERSONAL_INFO,
+  CONFIRM_FORM,
+  COMPLETION
+}
 export default function Home() {
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState<Steps>(Steps.PERSONAL_INFO);
 
   const StepForm = () => {
     switch (activeStep) {
-      case 0:
+      case Steps.PERSONAL_INFO:
         return <FormInfo setActiveStep={setActiveStep} />;
-      case 1:
+      case Steps.CONFIRM_FORM:
         return <ConfirmForm setActiveStep={setActiveStep} />;
-      case 2:
+      case Steps.COMPLETION:
         return <RegistrationResult />;
       default:
         return <FormInfo setActiveStep={setActiveStep} />;
-        break;
     }
   };
 
