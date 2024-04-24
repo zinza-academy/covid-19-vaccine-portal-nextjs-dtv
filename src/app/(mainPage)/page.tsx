@@ -10,7 +10,7 @@ export default function Home() {
   const { data } = useFetchProfileQuery({ token: 'auth_token' });
 
   return (
-    <Container maxWidth="xl">
+    <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box
         sx={{
           display: 'flex',
