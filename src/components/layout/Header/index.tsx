@@ -32,7 +32,7 @@ const Header: FC = () => {
     {
       id: 3,
       title: 'Tra cứu',
-      rightIcon: <Image src={'svg/arrow_down.svg'} height={20} width={20} alt="arrowIcon" />,
+      rightIcon: <Image src={'/svg/arrow_down.svg'} height={20} width={20} alt="arrowIcon" />,
       subMenuItems: [
         {
           id: 1,
@@ -40,7 +40,7 @@ const Header: FC = () => {
           subTitle: 'Cập nhật nhanh và chính xác nhất',
           path: '/vaccine-certificate',
           leftIcon: (
-            <Image src={'svg/user-group-cpurple.svg'} height={36} width={36} alt="userGroupIcon" />
+            <Image src={'/svg/user-group-cpurple.svg'} height={36} width={36} alt="userGroupIcon" />
           ),
           rightIcon: <EastIcon sx={{ color: 'blue' }} />
         },
@@ -50,7 +50,7 @@ const Header: FC = () => {
           subTitle: 'Cập nhật nhanh và chính xác nhất',
           path: '/vaccine-registration-result',
           leftIcon: (
-            <Image src={'svg/user-group-cblue.svg'} height={36} width={36} alt="userGroupIcon" />
+            <Image src={'/svg/user-group-cblue.svg'} height={36} width={36} alt="userGroupIcon" />
           ),
           rightIcon: <EastIcon sx={{ color: '#1E88E5' }} />
         }
@@ -79,7 +79,7 @@ const Header: FC = () => {
           alignItems="center"
         >
           <Stack direction="row" spacing={2} alignItems="center">
-            <Image src={'svg/logo.svg'} alt="logo" width={42} height={50} />
+            <Image src={'/svg/logo.svg'} alt="logo" width={42} height={50} />
             <Typography textTransform={'uppercase'}>Cổng thông tin tiêm chủng covid</Typography>
           </Stack>
           <Stack direction="row" spacing={2} alignItems={'center'} height={'50px'}>
