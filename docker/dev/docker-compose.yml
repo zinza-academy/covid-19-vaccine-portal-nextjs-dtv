@@ -1,0 +1,10 @@
+version: "3"
+#Docker port 3000, server port 8000
+services:
+  with-docker-multi-env-dev:
+    build:
+      context: ../../
+      dockerfile: docker/dev/Dockerfile
+    image: with-docker-multi-env-dev
+    ports:
+      - "8000:3000"
