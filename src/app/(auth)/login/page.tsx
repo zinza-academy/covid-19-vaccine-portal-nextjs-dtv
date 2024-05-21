@@ -2,14 +2,14 @@
 //libs
 import { Box, Button, FormLabel, TextField, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { IUserLoginForm } from '@/types/auth';
+import { ILoginError, IUserLoginForm } from '@/types/auth';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { useLoginMutation } from '@/api/auth';
-import { useFormStatus } from 'react-dom';
+import { useState } from 'react';
+import { AxiosError } from 'axios';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,11 +34,15 @@ export default function LoginPage() {
     },
     resolver: yupResolver(loginSchema)
   });
-  const [onLogin, { isLoading: isLoggingIn, error: loginError }] = useLoginMutation();
+  const [onLogin, { isLoading: isLoggingIn, error }] = useLoginMutation();
+
+  const loginError = error as ILoginError;
 
   const onSubmit = async (values: IUserLoginForm) => {
-    await onLogin(values);
-    router.push('/');
+    await onLogin(values).unwrap();
+    if (!loginError) {
+      router.push('/');
+    }
   };
 
   return (
@@ -77,6 +81,23 @@ export default function LoginPage() {
           maxWidth: '400px'
         }}
       >
+        {loginError && (
+          <Typography
+            sx={{
+              color: 'red',
+              textAlign: 'center',
+              fontSize: '14px',
+              display: 'block',
+              paddingY: '15px',
+              width: '100%',
+              borderRadius: '4px',
+              fontWeight: '500',
+              backgroundColor: 'rgba(247,9,9,0.06)'
+            }}
+          >
+            {loginError.data.message}
+          </Typography>
+        )}
         <Box sx={{ width: '100%' }}>
           <FormLabel sx={{ fontWeight: '500' }}>Email</FormLabel>
           <TextField
@@ -137,21 +158,6 @@ export default function LoginPage() {
           >
             Đăng nhập
           </Button>
-          <Typography
-            sx={{
-              color: 'red',
-              textAlign: 'center',
-              fontSize: '13px',
-              display: 'block',
-              paddingTop: '12px'
-            }}
-          >
-            {/* {loginError && (
-              <div>
-                Error: {loginError.status}
-              </div>
-            )} */}
-          </Typography>
         </Box>
         <Link href={'/forgot-password'} style={{ width: '100%', textDecoration: 'none' }}>
           <Typography
@@ -174,7 +180,7 @@ export default function LoginPage() {
         >
           Hoặc đăng ký tài khoản, nếu bạn chưa đăng ký!
         </Typography>
-        <Link href={'/auth/register'} style={{ width: '100%' }}>
+        <Link href={'/register'} style={{ width: '100%' }}>
           <Button
             variant="outlined"
             sx={{

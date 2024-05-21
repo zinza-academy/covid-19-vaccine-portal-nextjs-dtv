@@ -63,7 +63,11 @@ const VaccinationChart: FC = () => {
         <Typography sx={{ fontSize: '20px', fontWeight: '500', lineHeight: '160%' }}>
           Dữ liệu tiêm theo ngày
         </Typography>
-        <Line style={{ border: '1px solid #EE0033' }} options={options} data={data} />
+        <Line
+          style={{ border: '1px solid #EE0033', width: '100%' }}
+          options={options}
+          data={data}
+        />
       </Box>
     </Box>
   );

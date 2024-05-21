@@ -56,10 +56,10 @@ const VaccinationPoint: FC = () => {
   const watchDistrict = watch('district');
   const { data: provinces } = useFetchProvinceQuery();
   const { data: districts } = useFetchDistrictQuery({
-    provinceId: watchProvince
+    province_id: watchProvince
   });
   const { data: wards, refetch: refetchWard } = useFetchWardQuery({
-    districtId: watchDistrict
+    district_id: watchDistrict
   });
 
   const onSubmit = async (values: IProvinceForm) => {
@@ -105,9 +105,9 @@ const VaccinationPoint: FC = () => {
                     error={!!errors.province?.message}
                   >
                     {provinces &&
-                      provinces.results.map((province, index) => (
-                        <MenuItem key={index} value={province.province_id}>
-                          {province.province_name}
+                      provinces.map((province, index) => (
+                        <MenuItem key={index} value={province.id}>
+                          {province.name}
                         </MenuItem>
                       ))}
                   </Select>
@@ -127,9 +127,9 @@ const VaccinationPoint: FC = () => {
                     error={!!errors.district?.message}
                   >
                     {districts &&
-                      districts.results.map((district, index) => (
-                        <MenuItem key={index} value={district.district_id}>
-                          {district.district_name}
+                      districts.map((district, index) => (
+                        <MenuItem key={index} value={district.id}>
+                          {district.name}
                         </MenuItem>
                       ))}
                   </Select>
@@ -148,9 +148,9 @@ const VaccinationPoint: FC = () => {
                   <InputLabel id="demo-simple-select-label">Xã/Phường</InputLabel>
                   <Select id="ward" label="Xã/Phường" {...field} error={!!errors.province?.message}>
                     {wards &&
-                      wards.results.map((ward, index) => (
-                        <MenuItem key={index} value={ward.ward_id}>
-                          {ward.ward_name}
+                      wards.map((ward, index) => (
+                        <MenuItem key={index} value={ward.id}>
+                          {ward.name}
                         </MenuItem>
                       ))}
                   </Select>

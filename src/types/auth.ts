@@ -7,24 +7,50 @@ export interface IUserLoginForm {
   password: string;
 }
 export interface ILoginResponse {
-  // id: string;
   token: string;
-  email: string;
-  userName: string;
+  refresh_token: string;
+  token_expires: number;
+  user: IUser;
+}
+
+export interface IError {
+  statusCode: number;
+  message?: string;
+  errors?: {
+    email?: string;
+    password?: string;
+    server?: string;
+    unknown?: string;
+  };
+}
+export interface ILoginError {
+  data: IError;
+  status: number;
+}
+
+export interface IRegisterError {
+  statusCode: string;
+  message: string;
 }
 export interface IUser {
-  id: string;
-  userName?: string;
+  id: string | number;
+  citizen_id?: string;
   email: string;
+  password?: string;
+  full_name: string;
+  date_of_birth: string;
+  gender: string;
+  role: string;
+  ward_id?: string | number;
 }
 export interface IUserRegisterForm {
-  citizenID: string;
+  citizen_id: string;
   email: string;
   password: string;
-  fullName: string;
-  dateOfBirth: Dayjs;
+  full_name: string;
+  date_of_birth: Dayjs;
   gender: string;
-  province: string;
-  district: string;
-  ward: string;
+  province_id: string;
+  district_id: string;
+  ward_id: string;
 }

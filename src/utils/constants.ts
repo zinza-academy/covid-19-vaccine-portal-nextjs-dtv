@@ -2,6 +2,9 @@ interface IGroupPriority {
   id: number;
   value: string;
 }
+
+export const ACCESS_TOKEN = 'access_token';
+
 export const groupPriorities: IGroupPriority[] = [
   {
     id: 1,
