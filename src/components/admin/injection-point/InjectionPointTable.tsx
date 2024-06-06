@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import {
   Paper,
   Table,
@@ -7,50 +7,54 @@ import {
   TableContainer,
   TableHead,
   TablePagination,
-  TableRow,
-  Typography,
-  styled,
-  tableCellClasses
+  TableRow
 } from '@mui/material';
-import { IDistrict, IProvince, IWard } from '@/types/address';
-import { IInjectionPoint, IInjectionPointColumn } from '@/types/injection-point';
+import { LIMIT_PAGE_VACCINATION_SITE } from '@/utils/constants';
+import { IInjectionPoint, IInjectionPointUpdate } from '@/types/injection-point';
+import TableRowsLoader from '@/components/common/TableRowLoader';
 
-interface ITableProp {
-  columns: IInjectionPointColumn[];
-  data: IInjectionPoint[];
-  onEdit: React.Dispatch<React.SetStateAction<boolean>>;
+export interface Column {
+  id: string;
+  label: string;
+  minWidth?: number;
+  align?: 'center';
 }
 
-const InjectionPointTable: FC<ITableProp> = ({ columns, data, onEdit }) => {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(6);
+interface ITableProp {
+  columns: Column[];
+  onEdit: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditData: React.Dispatch<React.SetStateAction<IInjectionPointUpdate>>;
+  data?: {
+    data: IInjectionPoint[];
+    total: number;
+    limit: number;
+    page: number;
+  };
+  page: number;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+  isLoading?: boolean;
+  isFetching?: boolean;
+}
 
+const InjectionPointTable: FC<ITableProp> = ({
+  columns,
+  onEdit,
+  setEditData,
+  data,
+  page,
+  setPage,
+  isLoading,
+  isFetching
+}) => {
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
+  const handleSetEditData = (values: IInjectionPointUpdate) => {
+    setEditData(values);
+    onEdit(true);
   };
 
-  const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: theme.palette.common.black,
-      color: theme.palette.common.white
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 14
-    }
-  }));
-  const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.action.hover
-    },
-    '&:last-child td, &:last-child th': {
-      border: 0
-    }
-  }));
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer sx={{ maxHeight: 440 }}>
@@ -69,50 +73,56 @@ const InjectionPointTable: FC<ITableProp> = ({ columns, data, onEdit }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-              return (
-                <StyledTableRow
-                  hover
-                  role="checkbox"
-                  tabIndex={-1}
-                  key={row.id}
-                  onClick={() => onEdit(true)}
-                >
-                  {columns.map((column) => {
-                    const value = row[column.id as keyof typeof row];
-                    return (
-                      <StyledTableCell key={column.id} align={column.align}>
-                        {(value as IProvince)?.province_name && (
-                          <Typography>{(value as IProvince).province_name}</Typography>
-                        )}
-                        {(value as IDistrict)?.district_name && (
-                          <Typography>{(value as IDistrict).district_name}</Typography>
-                        )}
-                        {(value as IWard)?.ward_name && (
-                          <Typography>{(value as IWard).ward_name}</Typography>
-                        )}
-                        {!(
-                          (value as IProvince)?.province_name ||
-                          (value as IDistrict)?.district_name ||
-                          (value as IWard)?.ward_name
-                        ) && <Typography>{value as string | number}</Typography>}
-                      </StyledTableCell>
-                    );
-                  })}
-                </StyledTableRow>
-              );
-            })}
+            {(isLoading || isFetching) && <TableRowsLoader colsNum={columns.length} />}
+            {data &&
+              !(isLoading || isFetching) &&
+              data.data.map((row, index) => {
+                return (
+                  <TableRow
+                    hover
+                    role="checkbox"
+                    key={row.id}
+                    onClick={() =>
+                      handleSetEditData({
+                        id: row.id,
+                        manager: row.manager,
+                        name: row.name,
+                        number_table: row.number_table
+                      })
+                    }
+                  >
+                    <TableCell key="id">{index + 1}</TableCell>
+                    <TableCell key="name" align="center">
+                      {row.name}
+                    </TableCell>
+                    <TableCell key="house_number" align="center">
+                      {row.house_number}
+                    </TableCell>
+                    <TableCell key="street" align="center">
+                      {row.street}
+                    </TableCell>
+                    <TableCell key="ward" align="center">
+                      {row.ward.name}
+                    </TableCell>
+                    <TableCell key="manager" align="center">
+                      {row.manager}
+                    </TableCell>
+                    <TableCell key="number_table" align="center">
+                      {row.number_table}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[6, 12, 100]}
+        rowsPerPageOptions={[LIMIT_PAGE_VACCINATION_SITE]}
         component="div"
-        count={data.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
+        count={data?.total || 0}
+        rowsPerPage={data?.limit || LIMIT_PAGE_VACCINATION_SITE}
+        page={data ? data.page - 1 : 0}
         onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
       />
     </Paper>
   );

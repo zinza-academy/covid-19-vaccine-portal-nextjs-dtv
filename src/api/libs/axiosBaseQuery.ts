@@ -11,28 +11,45 @@ export const axiosBaseQuery =
       method: AxiosRequestConfig['method'];
       data?: AxiosRequestConfig['data'];
       params?: AxiosRequestConfig['params'];
+      headers?: AxiosRequestConfig['headers'];
     },
     unknown,
-    unknown
+    {
+      statusCode?: number;
+      message?: string;
+      error?: string;
+    }
   > =>
-  async ({ url, method, data, params }) => {
+  async ({ url, method, data, params, headers }) => {
     try {
       const result = await axiosInstance({
         url: baseUrl + url,
         method,
         data,
-        params
+        params,
+        headers
       });
 
       return { data: result.data };
     } catch (axiosError: any) {
-      console.error('Axios Errorxx:', axiosError);
-      return {
-        error: {
-          status: axiosError.response?.status || null,
-          data: axiosError.response?.data || null
-        }
-      };
+      let err = axiosError;
+      if (axiosError.response) {
+        err = {
+          statusCode: axiosError.response.status,
+          message: axiosError.response.data?.message || axiosError.message
+        };
+      } else if (axiosError.request) {
+        err = {
+          statusCode: 500,
+          message: 'No response received from server'
+        };
+      } else {
+        err = {
+          statusCode: 500,
+          message: axiosError.message
+        };
+      }
+      return { error: err };
     }
   };
 

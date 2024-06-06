@@ -15,7 +15,12 @@ const initialState: ILoginResponse = {
 const authSlice = createSlice({
   name: 'auth',
   initialState,
-  reducers: {},
+  reducers: {
+    logout: () => {
+      deleteCookie(ACCESS_TOKEN);
+      return {} as any;
+    }
+  },
   extraReducers: (builder) => {
     builder.addMatcher(authApi.endpoints.login.matchFulfilled, (_state, { payload }) => {
       const expire = new Date().getTime() + 1000 * 24 * 60 * 60;
@@ -30,5 +35,5 @@ const authSlice = createSlice({
 });
 
 export const selectAuthData = (state: AppState) => state.auth;
-
+export const { logout } = authSlice.actions;
 export default authSlice.reducer;

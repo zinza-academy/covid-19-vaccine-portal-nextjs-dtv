@@ -5,31 +5,26 @@ import {
   Button,
   FormControl,
   FormLabel,
-  InputLabel,
   MenuItem,
   Select,
   TextField,
   Typography,
-  FormHelperText
+  Alert,
+  Stack
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
 import { yupResolver } from '@hookform/resolvers/yup';
-import Link from 'next/link';
-import { useForm, Controller, useWatch, Control } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
-import { IRegisterError, IUserRegisterForm } from '@/types/auth';
+import { IUserRegisterForm } from '@/types/auth';
 import { useFetchDistrictQuery, useFetchProvinceQuery, useFetchWardQuery } from '@/api/address';
-import { useEffect, useState } from 'react';
-import { IProvince } from '@/types/address';
 import { useRegisterMutation } from '@/api/auth';
+import { genders } from '@/utils/constants';
 
 export default function LoginPage() {
-  const [registerError, setRegisterError] = useState('');
-
   const registerSchema = yup.object().shape({
     citizen_id: yup
       .string()
@@ -80,19 +75,12 @@ export default function LoginPage() {
     district_id: watchDistrict
   });
 
-  const [onRegister, { isLoading, error }] = useRegisterMutation();
+  const [onRegister, { isLoading, isSuccess, error }] = useRegisterMutation();
 
   const onSubmit = async (values: IUserRegisterForm) => {
     try {
       await onRegister(values).unwrap();
-    } catch (error) {
-      console.log(error);
-      setRegisterError('User already exists');
-      window.scrollTo({
-        top: 0,
-        behavior: 'auto'
-      });
-    }
+    } catch (error) {}
   };
   return (
     <Box
@@ -129,22 +117,15 @@ export default function LoginPage() {
           maxWidth: '400px'
         }}
       >
-        {registerError && (
-          <Typography
-            sx={{
-              color: 'red',
-              textAlign: 'center',
-              fontSize: '14px',
-              display: 'block',
-              paddingY: '15px',
-              width: '100%',
-              borderRadius: '4px',
-              fontWeight: '500',
-              backgroundColor: 'rgba(247,9,9,0.06)'
-            }}
-          >
-            {registerError}
-          </Typography>
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error.message}
+          </Alert>
+        )}
+        {isSuccess && (
+          <Alert severity="success" sx={{ width: '100%' }}>
+            Successfully
+          </Alert>
         )}
 
         <Box sx={{ width: '100%' }}>
@@ -274,32 +255,34 @@ export default function LoginPage() {
           />
         </Box>
 
-        <Box sx={{ width: '100%' }}>
-          <FormLabel
-            sx={{
-              color: '#000',
-              '&::after': {
-                content: '" (*)"',
-                color: 'red'
-              }
-            }}
-          >
-            Giới tính
-          </FormLabel>
-          <TextField
-            {...register('gender')}
-            id="date"
-            type="text"
-            placeholder="male/female"
-            variant="outlined"
-            error={!!errors.gender?.message}
-            helperText={errors.gender?.message}
-            sx={{
-              width: '100%',
-              marginTop: '6px'
-            }}
+        <Stack direction="column" spacing={1} width="100%">
+          <FormLabel sx={{ color: 'black' }}>Giới tính</FormLabel>
+          <Controller
+            control={control}
+            name="gender"
+            render={({ field }) => (
+              <FormControl>
+                <Select
+                  id="gender"
+                  {...field}
+                  error={!!errors.gender?.message}
+                  sx={{
+                    '& .MuiSelect-select .notranslate::after': {
+                      content: `"Giới tính"`,
+                      opacity: 0.42
+                    }
+                  }}
+                >
+                  {genders.map((item) => (
+                    <MenuItem key={item.id} value={item.value}>
+                      {item.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
           />
-        </Box>
+        </Stack>
         <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
           <FormLabel
             sx={{

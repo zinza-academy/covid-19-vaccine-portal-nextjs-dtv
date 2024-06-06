@@ -4,7 +4,7 @@ import { fetchBaseQuery, createApi } from '@reduxjs/toolkit/query/react';
 export const addressApi = createApi({
   reducerPath: 'addressApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.BASE_URL
+    baseUrl: `${process.env.BASE_URL}`
   }),
   endpoints: (builder) => ({
     fetchProvince: builder.query<IProvince[], void>({
@@ -15,13 +15,13 @@ export const addressApi = createApi({
     }),
     fetchDistrict: builder.query<IDistrict[], { province_id: string | number }>({
       query: ({ province_id }) => ({
-        url: `/provinces/districts/${province_id}`,
+        url: `/provinces/${province_id}/districts`,
         method: 'GET'
       })
     }),
     fetchWard: builder.query<IWard[], { district_id: string | number }>({
       query: ({ district_id }) => ({
-        url: `provinces/wards/${district_id}`,
+        url: `/districts/${district_id}/wards`,
         method: 'GET'
       })
     })

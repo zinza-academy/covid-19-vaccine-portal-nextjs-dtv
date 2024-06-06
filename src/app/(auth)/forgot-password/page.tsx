@@ -1,17 +1,15 @@
 'use client';
 //libs
-import { Box, Button, TextField, Typography } from '@mui/material';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { Alert, Box, Button, TextField, Typography } from '@mui/material';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { IForgotPasswordForm } from '@/types/auth';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
+import { useForgotPasswordMutation } from '@/api/auth';
 
 export default function ForgotPassword() {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [forgotPassword, { error, isLoading, isSuccess }] = useForgotPasswordMutation();
 
   const forgotPasswordSchema = yup.object().shape({
     email: yup.string().email('Invalid email').required('Email is required')
@@ -25,11 +23,9 @@ export default function ForgotPassword() {
   });
 
   const onSubmit = async (values: IForgotPasswordForm) => {
-    console.log('Enter: ', values.email);
-    setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
-    router.push('/forgot-password');
+    try {
+      await forgotPassword(values).unwrap();
+    } catch (err) {}
   };
 
   return (
@@ -56,7 +52,17 @@ export default function ForgotPassword() {
       >
         Để khôi phục mật khẩu, vui lòng nhập đúng email bạn đã dùng để đăng ký
       </Typography>
-
+      {error && (
+        <Alert severity="error" sx={{ width: '100%' }}>
+          {error.message}
+        </Alert>
+      )}
+      {isSuccess && (
+        <Alert severity="success" sx={{ width: '100%' }}>
+          An email has been sent to you with instructions to reset your password. Please check your
+          inbox.
+        </Alert>
+      )}
       <Box
         onSubmit={handleSubmit(onSubmit)}
         component="form"
@@ -88,7 +94,7 @@ export default function ForgotPassword() {
             gap: '24px'
           }}
         >
-          <Link href={'/auth/login'}>
+          <Link href={'/login'}>
             <Button
               variant="outlined"
               sx={{
@@ -103,7 +109,7 @@ export default function ForgotPassword() {
             </Button>
           </Link>
           <Button
-            disabled={isSubmitting || !isValid}
+            disabled={isLoading || !isValid}
             type="submit"
             variant="contained"
             sx={{

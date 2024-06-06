@@ -1,3 +1,4 @@
+import { IWard } from '@/types/address';
 import { Dayjs } from 'dayjs';
 export interface IForgotPasswordForm {
   email: string;
@@ -33,7 +34,7 @@ export interface IRegisterError {
   message: string;
 }
 export interface IUser {
-  id: string | number;
+  id: number;
   citizen_id?: string;
   email: string;
   password?: string;
@@ -42,6 +43,7 @@ export interface IUser {
   gender: string;
   role: string;
   ward_id?: string | number;
+  ward: IWard;
 }
 export interface IUserRegisterForm {
   citizen_id: string;
@@ -53,4 +55,9 @@ export interface IUserRegisterForm {
   province_id: string;
   district_id: string;
   ward_id: string;
+}
+
+export interface IResetPasswordForm {
+  password: string;
+  confirmPassword: string;
 }

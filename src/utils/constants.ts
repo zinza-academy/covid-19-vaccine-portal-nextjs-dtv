@@ -1,9 +1,31 @@
+import { IGender } from '@/types/user';
+
 interface IGroupPriority {
   id: number;
   value: string;
 }
 
 export const ACCESS_TOKEN = 'access_token';
+export const RESET_PASSWORD_TOKEN = 'token';
+export const LIMIT_PAGE_VACCINATION_SITE = 10;
+
+export enum Roles {
+  ADMIN = 'admin',
+  USER = 'user'
+}
+
+export const genders: IGender[] = [
+  {
+    id: 1,
+    value: 'male',
+    name: 'Nam'
+  },
+  {
+    id: 1,
+    value: 'female',
+    name: 'Nữ'
+  }
+];
 
 export const groupPriorities: IGroupPriority[] = [
   {

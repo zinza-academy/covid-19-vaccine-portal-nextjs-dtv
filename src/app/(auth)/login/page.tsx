@@ -1,15 +1,13 @@
 'use client';
 //libs
-import { Box, Button, FormLabel, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, FormLabel, TextField, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { ILoginError, IUserLoginForm } from '@/types/auth';
+import { IUserLoginForm } from '@/types/auth';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { useLoginMutation } from '@/api/auth';
-import { useState } from 'react';
-import { AxiosError } from 'axios';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,15 +32,13 @@ export default function LoginPage() {
     },
     resolver: yupResolver(loginSchema)
   });
-  const [onLogin, { isLoading: isLoggingIn, error }] = useLoginMutation();
-
-  const loginError = error as ILoginError;
+  const [onLogin, { isLoading, error }] = useLoginMutation();
 
   const onSubmit = async (values: IUserLoginForm) => {
-    await onLogin(values).unwrap();
-    if (!loginError) {
+    try {
+      await onLogin(values).unwrap();
       router.push('/');
-    }
+    } catch (error) {}
   };
 
   return (
@@ -81,22 +77,10 @@ export default function LoginPage() {
           maxWidth: '400px'
         }}
       >
-        {loginError && (
-          <Typography
-            sx={{
-              color: 'red',
-              textAlign: 'center',
-              fontSize: '14px',
-              display: 'block',
-              paddingY: '15px',
-              width: '100%',
-              borderRadius: '4px',
-              fontWeight: '500',
-              backgroundColor: 'rgba(247,9,9,0.06)'
-            }}
-          >
-            {loginError.data.message}
-          </Typography>
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error.message}
+          </Alert>
         )}
         <Box sx={{ width: '100%' }}>
           <FormLabel sx={{ fontWeight: '500' }}>Email</FormLabel>
@@ -136,7 +120,7 @@ export default function LoginPage() {
           }}
         >
           <Button
-            disabled={isLoggingIn || !isValid}
+            disabled={isLoading || !isValid}
             type="submit"
             variant="outlined"
             sx={{

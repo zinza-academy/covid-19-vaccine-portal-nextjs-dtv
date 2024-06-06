@@ -3,7 +3,7 @@
 import ConfirmForm from '@/components/vaccine-registration/ConfirmForm';
 import FormInfo from '@/components/vaccine-registration/FormInfo';
 import RegistrationResult from '@/components/vaccine-registration/RegistrationResult';
-import { Box, Button, Stack, Step, StepLabel, Stepper, Typography } from '@mui/material';
+import { Box, Stack, Step, StepLabel, Stepper } from '@mui/material';
 import React, { useState } from 'react';
 
 const steps = ['Thông tin cá nhân', 'Phiếu đồng ý tiêm', 'Hoàn thành'];

@@ -1,8 +1,12 @@
+'use client';
+import { useFetchForUserQuery } from '@/api/vaccination-results';
 import CertificateCard from '@/components/account/CertificateCard';
+import { useAppSelector } from '@/lib/store';
+import { formatTime } from '@/utils/formatTime';
 import {
-  Box,
   Button,
   Grid,
+  LinearProgress,
   Paper,
   Stack,
   Table,
@@ -15,32 +19,13 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 
-interface IVaccinationData {
-  doseNumber: number;
-  date: string;
-  vaccineName: string;
-  lotNumber: string;
-  vaccinationLocation: string;
-}
-
-const vaccinationData: IVaccinationData[] = [
-  {
-    doseNumber: 1,
-    date: '2022-03-15',
-    vaccineName: 'Pfizer-BioNTech',
-    lotNumber: 'NA2732',
-    vaccinationLocation: 'TYT Dịch Vọng Hậu'
-  },
-  {
-    doseNumber: 2,
-    date: '2022-04-12',
-    vaccineName: 'Pfizer-BioNTech',
-    lotNumber: 'NA2732',
-    vaccinationLocation: 'TYT Dịch Vọng Hậu'
-  }
-];
-
 export default function VaccineCertificate() {
+  const { data, isLoading, isFetching } = useFetchForUserQuery();
+  const { user: userData } = useAppSelector((state) => state.auth);
+  if (isLoading || isFetching) {
+    return <LinearProgress />;
+  }
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={9}>
@@ -54,42 +39,45 @@ export default function VaccineCertificate() {
               CHỨNG NHẬN TIÊM CHỦNG COVID-19
             </Typography>
           </Stack>
-          <Stack direction="column" spacing={1}>
-            <Grid container spacing={2}>
-              <Grid item xs={3}>
-                <Typography>Họ và tên</Typography>
-                <Typography fontWeight={500}>Nguyễn Văn A</Typography>
+          {data && data?.length > 0 && userData && (
+            <Stack direction="column" spacing={1}>
+              <Grid container spacing={2}>
+                <Grid item xs={3}>
+                  <Typography>Họ và tên</Typography>
+                  <Typography fontWeight={500}>{data[0].user.full_name}</Typography>
+                </Grid>
+                <Grid item xs={3}>
+                  <Typography>Ngày sinh</Typography>
+                  <Typography fontWeight={500}>{formatTime(data[0].user.date_of_birth)}</Typography>
+                </Grid>
+                <Grid item xs={3}>
+                  <Typography>Số CMND/CCCD</Typography>
+                  <Typography fontWeight={500}>{data[0].user.citizen_id}</Typography>
+                </Grid>
+                <Grid item xs={3}>
+                  <Typography>Số thẻ BHYT</Typography>
+                  <Typography fontWeight={500}>{data[0].vaccinationRegistration.hic}</Typography>
+                </Grid>
               </Grid>
-              <Grid item xs={3}>
-                <Typography>Ngày sinh</Typography>
-                <Typography fontWeight={500}>16/10/1994</Typography>
+              <Grid container spacing={2}>
+                <Grid item>
+                  <Typography>Địa chỉ </Typography>
+                  <Typography fontWeight={500}>
+                    {userData.ward.name} - {userData.ward.district?.name} -{' '}
+                    {userData.ward.district?.province?.name}
+                  </Typography>
+                </Grid>
               </Grid>
-              <Grid item xs={3}>
-                <Typography>Số CMND/CCCD</Typography>
-                <Typography fontWeight={500}>030012345678</Typography>
+              <Grid container spacing={2}>
+                <Grid item>
+                  <Typography>Kết luận</Typography>
+                  <Typography fontWeight={500}>
+                    Đã được tiêm phòng vắc xin phòng bệnh Covid-19
+                  </Typography>
+                </Grid>
               </Grid>
-              <Grid item xs={3}>
-                <Typography>Số thẻ BHYT</Typography>
-                <Typography fontWeight={500}>030094005102</Typography>
-              </Grid>
-            </Grid>
-            <Grid container spacing={2}>
-              <Grid item>
-                <Typography>Địa chỉ </Typography>
-                <Typography fontWeight={500}>
-                  Phường Giang Biên - Quận Long Biên - Thành phố Hà Nội
-                </Typography>
-              </Grid>
-            </Grid>
-            <Grid container spacing={2}>
-              <Grid item>
-                <Typography>Kết luận</Typography>
-                <Typography fontWeight={500}>
-                  Đã được tiêm phòng vắc xin phòng bệnh Covid-19
-                </Typography>
-              </Grid>
-            </Grid>
-          </Stack>
+            </Stack>
+          )}
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 650 }} aria-label="vaccine_table">
               <TableHead sx={{ backgroundColor: '#EEEEEE' }}>
@@ -104,20 +92,21 @@ export default function VaccineCertificate() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {vaccinationData.map((row) => (
-                  <TableRow
-                    key={row.doseNumber}
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                  >
-                    <TableCell size="small" align="center">
-                      {row.doseNumber}
-                    </TableCell>
-                    <TableCell align="center">{row.date}</TableCell>
-                    <TableCell align="center">{row.vaccineName}</TableCell>
-                    <TableCell align="center">{row.lotNumber}</TableCell>
-                    <TableCell align="center">{row.vaccinationLocation}</TableCell>
-                  </TableRow>
-                ))}
+                {data &&
+                  data.map((row, index) => (
+                    <TableRow
+                      key={index}
+                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    >
+                      <TableCell size="small" align="center">
+                        {index + 1}
+                      </TableCell>
+                      <TableCell align="center">{row.time}</TableCell>
+                      <TableCell align="center">{row.vaccinationType.name}</TableCell>
+                      <TableCell align="center">{row.lot}</TableCell>
+                      <TableCell align="center">{row.vaccinationSite.name}</TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -145,7 +134,7 @@ export default function VaccineCertificate() {
         </Stack>
       </Grid>
       <Grid item xs={3}>
-        <CertificateCard doseNumber={vaccinationData.length} />
+        <CertificateCard data={userData} doseNumber={data?.length || 0} />
       </Grid>
     </Grid>
   );

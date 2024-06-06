@@ -7,12 +7,14 @@ export interface IDistrict {
   id: string;
   name: string;
   province_id: string;
+  province?: IProvince;
 }
 
 export interface IWard {
   id: string;
   name: string;
   district_id: string;
+  district?: IDistrict;
 }
 
 export interface IProvinceForm {

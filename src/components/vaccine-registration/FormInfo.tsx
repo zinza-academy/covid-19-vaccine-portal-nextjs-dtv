@@ -22,36 +22,32 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import Link from 'next/link';
 import { Dispatch, SetStateAction } from 'react';
+import { createData } from '@/lib/features/vaccination-registration/VaccinationRegistrationSlice';
+import { useAppDispatch } from '@/lib/store';
+import { IVaccineRegistrationFormData } from '@/types/vaccination-registration';
 
 interface IProp {
   setActiveStep: Dispatch<SetStateAction<number>>;
 }
 
-export interface IVaccineRegistrationFormData {
-  groupPriority: string;
-  hic?: string;
-  job?: string;
-  workingPlace?: string;
-  address?: string;
-  appointmentDate: Dayjs;
-  session: string;
-}
 const FormInfo: FC<IProp> = ({ setActiveStep }) => {
+  const dispatch = useAppDispatch();
+
   const formInfoSchema = yup
     .object()
     .shape({
-      groupPriority: yup.string().required('Không để trống'),
+      group_priority: yup.number().required('Không để trống'),
       hic: yup.string(),
       job: yup.string(),
-      workingPlace: yup.string(),
+      working_place: yup.string(),
       address: yup.string(),
-      appointmentDate: yup
+      appointment_date: yup
         .mixed<Dayjs>()
         .required()
         .test('is-future-date', 'Ngày không hợp lệ', function (value) {
           return value && value.isAfter(dayjs(), 'day');
         }),
-      session: yup.string().required()
+      session: yup.number().required()
     })
     .required();
   const {
@@ -62,18 +58,18 @@ const FormInfo: FC<IProp> = ({ setActiveStep }) => {
   } = useForm<IVaccineRegistrationFormData>({
     mode: 'onChange',
     defaultValues: {
-      groupPriority: '',
+      group_priority: 1,
       hic: '',
       job: '',
-      workingPlace: '',
+      working_place: '',
       address: '',
-      appointmentDate: dayjs().add(1, 'day'),
-      session: ''
+      appointment_date: dayjs().add(1, 'day'),
+      session: 1
     },
     resolver: yupResolver(formInfoSchema)
   });
   const onSubmit = async (values: IVaccineRegistrationFormData) => {
-    console.log('>>> Check data: ', values);
+    dispatch(createData(values));
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
   return (
@@ -104,13 +100,13 @@ const FormInfo: FC<IProp> = ({ setActiveStep }) => {
             </FormLabel>
             <Controller
               control={control}
-              name="groupPriority"
+              name="group_priority"
               render={({ field }) => (
                 <FormControl>
                   <Select
                     id="groupPriority"
                     {...field}
-                    error={!!errors.groupPriority?.message}
+                    error={!!errors.group_priority?.message}
                     sx={{
                       '& .MuiSelect-select .notranslate::after': {
                         content: `"Nhóm ưu tiên"`,
@@ -119,7 +115,7 @@ const FormInfo: FC<IProp> = ({ setActiveStep }) => {
                     }}
                   >
                     {groupPriorities.map((item) => (
-                      <MenuItem key={item.id} value={item.value}>
+                      <MenuItem key={item.id} value={item.id}>
                         {item.value}
                       </MenuItem>
                     ))}
@@ -153,7 +149,7 @@ const FormInfo: FC<IProp> = ({ setActiveStep }) => {
           <Stack direction="column" spacing={1} width={330}>
             <FormLabel sx={{ color: 'black' }}>Đơn vị công tác</FormLabel>
             <TextField
-              {...register('workingPlace')}
+              {...register('working_place')}
               id="workingPlace"
               type="text"
               placeholder="Đơn vị công tác"
@@ -176,13 +172,13 @@ const FormInfo: FC<IProp> = ({ setActiveStep }) => {
           <Stack direction="column" spacing={1} width={330}>
             <FormLabel sx={{ color: 'black' }}>Ngày muốn được tiêm (dự kiến)</FormLabel>
             <Controller
-              name="appointmentDate"
+              name="appointment_date"
               control={control}
               render={({ field, fieldState }) => (
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker disablePast {...field} format="DD/MM/YYYY" />
-                  {errors.appointmentDate?.message && (
-                    <FormHelperText error>{errors.appointmentDate?.message}</FormHelperText>
+                  {errors.appointment_date?.message && (
+                    <FormHelperText error>{errors.appointment_date?.message}</FormHelperText>
                   )}
                 </LocalizationProvider>
               )}
@@ -208,7 +204,7 @@ const FormInfo: FC<IProp> = ({ setActiveStep }) => {
                     }}
                   >
                     {sessions.map((item) => (
-                      <MenuItem key={item.id} value={item.value}>
+                      <MenuItem key={item.id} value={item.id}>
                         {item.value}
                       </MenuItem>
                     ))}

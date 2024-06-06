@@ -1,3 +1,4 @@
+'use client';
 import AccountNavigate from '@/components/account/AccountNavigate';
 import { Box, Container, Stack } from '@mui/material';
 

@@ -1,5 +1,12 @@
 import { fetchBaseQuery, createApi } from '@reduxjs/toolkit/query/react';
-import { ILoginResponse, IUser, IUserLoginForm, IUserRegisterForm } from '@/types/auth';
+import {
+  IForgotPasswordForm,
+  ILoginResponse,
+  IResetPasswordForm,
+  IUser,
+  IUserLoginForm,
+  IUserRegisterForm
+} from '@/types/auth';
 import { axiosBaseQuery } from '@/api/libs/axiosBaseQuery';
 
 export const authApi = createApi({
@@ -23,7 +30,7 @@ export const authApi = createApi({
         data: data
       })
     }),
-    fetchProfile: builder.query<IUser, undefined>({
+    fetchProfile: builder.query<IUser, void>({
       query: () => ({
         url: '/auth/profile',
         method: 'GET'
@@ -34,10 +41,30 @@ export const authApi = createApi({
         url: '/auth/logout',
         method: 'POST'
       })
+    }),
+    forgotPassword: builder.mutation<any, IForgotPasswordForm>({
+      query: (data) => ({
+        url: '/auth/forgot-password',
+        method: 'POST',
+        data
+      })
+    }),
+    resetPassword: builder.mutation<any, IResetPasswordForm & { token: string }>({
+      query: (data) => ({
+        url: '/auth/reset-password',
+        method: 'POST',
+        data
+      })
     })
   })
 });
 
-export const { useLoginMutation, useFetchProfileQuery, useLogoutMutation, useRegisterMutation } =
-  authApi;
+export const {
+  useLoginMutation,
+  useFetchProfileQuery,
+  useLogoutMutation,
+  useRegisterMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation
+} = authApi;
 export const { login } = authApi.endpoints;
