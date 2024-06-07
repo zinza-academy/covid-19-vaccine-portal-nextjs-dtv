@@ -1,5 +1,6 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import {
+  Button,
   Paper,
   Table,
   TableBody,
@@ -7,50 +8,42 @@ import {
   TableContainer,
   TableHead,
   TablePagination,
-  TableRow,
-  Typography,
-  styled,
-  tableCellClasses
+  TableRow
 } from '@mui/material';
-import { IDocument, IDocumentColumn } from '@/types/document';
+import { IDocument, IDocumentColumn, IDocumentUpdate } from '@/types/document';
+import TableRowsLoader from '@/components/common/TableRowLoader';
+import { useRouter } from 'next/navigation';
 
 interface ITableProp {
   columns: IDocumentColumn[];
-  data: IDocument[];
+  data?: IDocument[];
   onEdit: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditData: React.Dispatch<React.SetStateAction<IDocumentUpdate>>;
+  page: number;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+  isLoading?: boolean;
+  isFetching?: boolean;
 }
 
-const DocumentTable: FC<ITableProp> = ({ columns, data, onEdit }) => {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(6);
-
+const DocumentTable: FC<ITableProp> = ({
+  columns,
+  data,
+  onEdit,
+  setEditData,
+  page,
+  setPage,
+  isLoading,
+  isFetching
+}) => {
+  const router = useRouter();
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
+  const handleSetEditData = (values: any) => {
+    setEditData(values);
+    onEdit(true);
   };
-
-  const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: theme.palette.common.black,
-      color: theme.palette.common.white
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 14
-    }
-  }));
-  const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.action.hover
-    },
-    // hide last border
-    '&:last-child td, &:last-child th': {
-      border: 0
-    }
-  }));
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer sx={{ maxHeight: 440 }}>
@@ -65,37 +58,51 @@ const DocumentTable: FC<ITableProp> = ({ columns, data, onEdit }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-              return (
-                <StyledTableRow
-                  hover
-                  role="checkbox"
-                  tabIndex={-1}
-                  key={row.id}
-                  onClick={() => onEdit(true)}
-                >
-                  {columns.map((column) => {
-                    const value = row[column.id as keyof typeof row];
-                    return (
-                      <StyledTableCell key={column.id} align="center">
-                        <Typography>{value as string | number}</Typography>
-                      </StyledTableCell>
-                    );
-                  })}
-                </StyledTableRow>
-              );
-            })}
+            {(isLoading || isFetching) && <TableRowsLoader colsNum={columns.length} />}
+            {data &&
+              !(isLoading || isFetching) &&
+              data.map((row, index) => {
+                return (
+                  <TableRow hover role="checkbox" key={row.id}>
+                    <TableCell key="id">{index + 1}</TableCell>
+                    <TableCell key="name" align="center">
+                      {row.name}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        color="secondary"
+                        onClick={() =>
+                          handleSetEditData({
+                            id: row.id,
+                            name: row.name
+                          })
+                        }
+                      >
+                        Edit
+                      </Button>
+                    </TableCell>
+                    <TableCell key="street" align="center">
+                      <Button
+                        onClick={() =>
+                          router.push(`${process.env.BASE_URL}/documents/download/${row.id}`)
+                        }
+                      >
+                        Download
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[6, 12, 100]}
+        rowsPerPageOptions={[6]}
         component="div"
-        count={data.length}
-        rowsPerPage={rowsPerPage}
+        count={data?.length || 0}
+        rowsPerPage={10}
         page={page}
         onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
       />
     </Paper>
   );

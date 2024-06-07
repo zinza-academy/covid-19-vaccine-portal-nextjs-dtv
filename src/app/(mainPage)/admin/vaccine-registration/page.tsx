@@ -1,18 +1,22 @@
 'use client';
 
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Button, Container, Paper, Stack, TextField } from '@mui/material';
+import { Button, Container, Stack, TextField } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import SearchIcon from '@mui/icons-material/Search';
 import * as yup from 'yup';
 import { useState } from 'react';
-import { vaccineRegistrationData } from '@/mockData/vaccineRegistrationData';
 import VaccineRegistrationTable from '@/components/admin/vaccine-registration/VaccineRegistrationTable';
 import EditModal from '@/components/admin/vaccine-registration/EditModal';
 import { ISearchVaccineRegistrationForm, IVaccineRegistrationColumn } from '@/types/vaccine';
+import { useFetchAllQuery } from '@/api/vaccination-registration';
+import { ICreateVaccinationResult } from '@/types/vaccination_result';
+import dayjs from 'dayjs';
+import { IVaccinationRegistrationResult } from '@/types/vaccination-registration';
 
 const columns: IVaccineRegistrationColumn[] = [
-  { id: 'name', label: 'Họ tên' },
+  { id: 'id', label: 'STT' },
+  { id: 'name', label: 'Họ tên', align: 'center' },
   { id: 'hic', label: 'Số thẻ bảo hiểm y tế', align: 'center', minWidth: 170 },
   { id: 'groupPriority', label: 'Nhóm ưu tiên', align: 'center' },
   { id: 'appointmentDate', label: 'Ngày tiêm', align: 'center' },
@@ -22,11 +26,17 @@ const columns: IVaccineRegistrationColumn[] = [
 
 export default function InjectionPoint() {
   const [open, setOpen] = useState(false);
-  const [data, setData] = useState(vaccineRegistrationData);
-  const searchSchema = yup.object().shape({
-    fullName: yup.string().required('Require'),
-    hic: yup.string().required('Require')
+  const [page, setPage] = useState(0);
+  const [keyword, setKeyword] = useState('');
+  const { data, isLoading, isFetching, refetch } = useFetchAllQuery({
+    hic: keyword,
+    page: page + 1
   });
+  const searchSchema = yup.object().shape({
+    hic: yup.string().nullable()
+  });
+
+  const [editData, setEditData] = useState<IVaccinationRegistrationResult | null>(null);
 
   const {
     register,
@@ -35,36 +45,22 @@ export default function InjectionPoint() {
   } = useForm<ISearchVaccineRegistrationForm>({
     mode: 'onChange',
     defaultValues: {
-      fullName: '',
       hic: ''
     },
     resolver: yupResolver(searchSchema)
   });
 
   const onSubmit = async (values: ISearchVaccineRegistrationForm) => {
-    console.log('checkdate >>', values);
+    if (values.hic) {
+      setKeyword(values.hic);
+    }
   };
 
   return (
     <Container maxWidth="xl">
-      <EditModal open={open} setOpen={setOpen} />
+      <EditModal open={open} setOpen={setOpen} editData={editData} refetchData={refetch} />
       <Stack direction="column" spacing={2} pt={2}>
         <Stack component="form" direction="row" spacing={2} onSubmit={handleSubmit(onSubmit)}>
-          <Stack>
-            <TextField
-              {...register('fullName')}
-              id="fullName"
-              type="text"
-              placeholder="Họ và tên"
-              variant="outlined"
-              error={!!errors.fullName?.message}
-              helperText={errors.fullName?.message}
-              size="small"
-              sx={{
-                width: '260px'
-              }}
-            />
-          </Stack>
           <Stack>
             <TextField
               {...register('hic')}
@@ -81,7 +77,7 @@ export default function InjectionPoint() {
             />
           </Stack>
           <Button
-            disabled={!isValid}
+            disabled={!isValid || isLoading}
             type="submit"
             variant="outlined"
             sx={{
@@ -109,7 +105,16 @@ export default function InjectionPoint() {
           </Button>
         </Stack>
         <Stack>
-          <VaccineRegistrationTable columns={columns} data={data} onEdit={setOpen} />
+          <VaccineRegistrationTable
+            columns={columns}
+            data={data}
+            onEdit={setOpen}
+            setEditData={setEditData}
+            isLoading={isLoading}
+            isFetching={isFetching}
+            page={page}
+            setPage={setPage}
+          />
         </Stack>
       </Stack>
     </Container>

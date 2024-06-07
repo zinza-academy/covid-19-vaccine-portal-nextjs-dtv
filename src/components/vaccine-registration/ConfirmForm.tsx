@@ -1,6 +1,6 @@
 import { Button, Checkbox, Stack, Typography, Divider } from '@mui/material';
 import Image from 'next/image';
-import { Dispatch, FC, SetStateAction } from 'react';
+import { Dispatch, FC, SetStateAction, useState } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
@@ -35,6 +35,7 @@ const terms: ITerm[] = [
   }
 ];
 const ConfirmForm: FC<IProp> = ({ setActiveStep }) => {
+  const [confirmTerm, setConfirmTerm] = useState<boolean>(false);
   return (
     <Stack direction="column" spacing={2}>
       <Stack direction="column" spacing={2} paddingTop={4}>
@@ -51,7 +52,7 @@ const ConfirmForm: FC<IProp> = ({ setActiveStep }) => {
           Sau khi đã đọc các thông tin nêu trên, tôi đã hiểu về các nguy cơ và:
         </Typography>
         <Stack direction="row" alignItems="center">
-          <Checkbox />
+          <Checkbox checked={confirmTerm} onChange={(e) => setConfirmTerm(e.target.checked)} />
           <Typography>Đồng ý tiêm chủng</Typography>
         </Stack>
       </Stack>
@@ -83,6 +84,7 @@ const ConfirmForm: FC<IProp> = ({ setActiveStep }) => {
           onClick={() => {
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
           }}
+          disabled={!confirmTerm}
           variant="outlined"
           sx={{
             color: '#fff',

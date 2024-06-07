@@ -1,5 +1,6 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import {
+  Chip,
   Paper,
   Table,
   TableBody,
@@ -7,50 +8,47 @@ import {
   TableContainer,
   TableHead,
   TablePagination,
-  TableRow,
-  Typography,
-  styled,
-  tableCellClasses
+  TableRow
 } from '@mui/material';
-import { IVaccineRegistrationColumn, IVaccineRegistrationData } from '@/types/vaccine';
+import { IVaccineRegistrationColumn } from '@/types/vaccine';
+import { IVaccinationRegistrationResult } from '@/types/vaccination-registration';
+import TableRowsLoader from '@/components/common/TableRowLoader';
+import { LIMIT_PAGE_VACCINATION_SITE } from '@/utils/constants';
 
 interface ITableProp {
   columns: IVaccineRegistrationColumn[];
-  data: IVaccineRegistrationData[];
+  data?: {
+    data: IVaccinationRegistrationResult[];
+    total: number;
+    limit: number;
+    page: number;
+  };
   onEdit: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditData: React.Dispatch<React.SetStateAction<IVaccinationRegistrationResult | null>>;
+  page: number;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+  isLoading?: boolean;
+  isFetching?: boolean;
 }
 
-const VaccineRegistrationTable: FC<ITableProp> = ({ columns, data, onEdit }) => {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(6);
-
+const VaccineRegistrationTable: FC<ITableProp> = ({
+  columns,
+  data,
+  onEdit,
+  setEditData,
+  isLoading,
+  isFetching,
+  page,
+  setPage
+}) => {
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
+  const handleEditData = (values: IVaccinationRegistrationResult) => {
+    setEditData(values);
+    onEdit(true);
   };
-
-  const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: theme.palette.common.black,
-      color: theme.palette.common.white
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 14
-    }
-  }));
-  const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.action.hover
-    },
-    // hide last border
-    '&:last-child td, &:last-child th': {
-      border: 0
-    }
-  }));
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer sx={{ maxHeight: 440 }}>
@@ -69,37 +67,47 @@ const VaccineRegistrationTable: FC<ITableProp> = ({ columns, data, onEdit }) => 
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-              return (
-                <StyledTableRow
-                  hover
-                  role="checkbox"
-                  tabIndex={-1}
-                  key={row.id}
-                  onClick={() => onEdit(true)}
-                >
-                  {columns.map((column) => {
-                    const value = row[column.id as keyof typeof row];
-                    return (
-                      <StyledTableCell key={column.id} align={column.align}>
-                        <Typography>{value as string | number}</Typography>
-                      </StyledTableCell>
-                    );
-                  })}
-                </StyledTableRow>
-              );
-            })}
+            {(isLoading || isFetching) && <TableRowsLoader colsNum={columns.length} />}
+            {data &&
+              data.data.map((row, index) => {
+                return (
+                  <TableRow hover role="checkbox" key={row.id} onClick={() => handleEditData(row)}>
+                    <TableCell key="id">{index + 1}</TableCell>
+                    <TableCell key="name" align="center">
+                      {row.user.full_name}
+                    </TableCell>
+                    <TableCell key="hic" align="center">
+                      {row.hic}
+                    </TableCell>
+                    <TableCell key="priorityGroup" align="center">
+                      {row.priorityGroup.name}
+                    </TableCell>
+                    <TableCell key="appointmentDate" align="center">
+                      {row.vaccinationResult?.time}
+                    </TableCell>
+                    <TableCell key="session" align="center">
+                      {row.vaccinationSession?.name}
+                    </TableCell>
+                    <TableCell key="number_table" align="center">
+                      {row.vaccinationResult ? (
+                        <Chip label="Đã tiêm" color="success" variant="outlined" />
+                      ) : (
+                        <Chip label="Chưa tiêm" color="warning" variant="outlined" />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[6, 12, 100]}
+        rowsPerPageOptions={[LIMIT_PAGE_VACCINATION_SITE]}
         component="div"
-        count={data.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
+        count={data?.total || 0}
+        rowsPerPage={data?.limit || LIMIT_PAGE_VACCINATION_SITE}
+        page={data ? data.page - 1 : 0}
         onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
       />
     </Paper>
   );

@@ -1,11 +1,38 @@
-import { Button, Checkbox, Grid, Stack, Typography } from '@mui/material';
-import Image from 'next/image';
-import { Dispatch, FC, SetStateAction } from 'react';
+import { Box, Button, Grid, Stack, Typography } from '@mui/material';
+import { FC } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Link from 'next/link';
+import { AppState, useAppSelector } from '@/lib/store';
+import { useCreateMutation } from '@/api/vaccination-registration';
+import { useRouter } from 'next/navigation';
 
 const RegistrationResult: FC = () => {
+  const vaccinationRegistrationData = useAppSelector(
+    (state: AppState) => state.vaccinationRegistration
+  );
+
+  const router = useRouter();
+  const userData = useAppSelector((state: AppState) => state.auth);
+
+  const [onSubmit, { isLoading }] = useCreateMutation();
+
+  const handleSubmit = async () => {
+    try {
+      await onSubmit({
+        priority_id: vaccinationRegistrationData.group_priority,
+        hic: vaccinationRegistrationData.hic,
+        job: vaccinationRegistrationData.job,
+        workplace: vaccinationRegistrationData.working_place,
+        address: vaccinationRegistrationData.address,
+        appointment_date: vaccinationRegistrationData.appointment_date.toISOString(),
+        user_id: userData.user.id
+      }).unwrap();
+
+      router.push('/vaccine-registration-result');
+    } catch (error) {}
+  };
+
   return (
     <Stack direction="column" spacing={2}>
       <Stack alignItems="center">
@@ -14,7 +41,7 @@ const RegistrationResult: FC = () => {
             Đăng ký tiêm chủng COVID-19 thành công. Mã đặt tiêm của bạn là
           </Typography>
           <Typography fontWeight={500} fontSize={20} color="red">
-            0120211103501237
+            {userData.user.citizen_id}
           </Typography>
         </Stack>
       </Stack>
@@ -34,38 +61,39 @@ const RegistrationResult: FC = () => {
       <Grid container spacing={2}>
         <Grid item xs={4}>
           <Typography>Họ và tên</Typography>
-          <Typography fontWeight={500}>Nguyễn Văn A</Typography>
+          <Typography fontWeight={500}> {userData.user.full_name}</Typography>
         </Grid>
         <Grid item xs={4}>
           <Typography>Ngày sinh</Typography>
-          <Typography fontWeight={500}>16/10/1994</Typography>
+          <Typography fontWeight={500}>{userData.user.date_of_birth}</Typography>
         </Grid>
         <Grid item xs={4}>
           <Typography>Giới tính</Typography>
-          <Typography fontWeight={500}>Nam</Typography>
+          <Typography fontWeight={500}>{userData.user.gender === 'male' ? 'Nam' : 'Nữ'}</Typography>
         </Grid>
       </Grid>
       <Grid container spacing={2}>
         <Grid item xs={4}>
           <Typography>Số CMND/CCCD/Mã định danh công dân</Typography>
-          <Typography fontWeight={500}>Nguyễn Văn A</Typography>
+          <Typography fontWeight={500}> {userData.user.citizen_id}</Typography>
         </Grid>
         <Grid item xs={4}>
           <Typography>Số thẻ BHYT</Typography>
+          <Typography fontWeight={500}>{vaccinationRegistrationData.hic}</Typography>
         </Grid>
       </Grid>
       <Grid container spacing={2}>
         <Grid item xs={4}>
           <Typography>Tỉnh/Thành phố</Typography>
-          <Typography fontWeight={500}>Nam Định</Typography>
+          <Typography fontWeight={500}>{userData.user.ward.district?.province?.name}</Typography>
         </Grid>
         <Grid item xs={4}>
           <Typography>Quận/Huyện</Typography>
-          <Typography fontWeight={500}>Giao Thủy</Typography>
+          <Typography fontWeight={500}>{userData.user.ward.district?.name}</Typography>
         </Grid>
         <Grid item xs={4}>
           <Typography>Xã/Phường</Typography>
-          <Typography fontWeight={500}>Giao Long</Typography>
+          <Typography fontWeight={500}>{userData.user.ward.name}</Typography>
         </Grid>
       </Grid>
       <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
@@ -93,6 +121,8 @@ const RegistrationResult: FC = () => {
         </Link>
         <Button
           variant="outlined"
+          onClick={handleSubmit}
+          disabled={isLoading}
           sx={{
             color: '#fff',
             borderColor: '#303F9F',

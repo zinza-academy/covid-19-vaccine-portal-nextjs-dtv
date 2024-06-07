@@ -1,12 +1,27 @@
 export interface IDocument {
-  id: string | number;
+  id: number;
   name: string;
-  file: string;
+  original_name: string;
+  path: string;
+  mime_type: string;
+  size: number;
 }
-export interface IEditDocumentForm {
+
+export interface IDocumentUpdate {
+  id: number;
   name: string;
-  file: string;
+  file?: File | null;
 }
+
+export interface IDocumentUpdateForm {
+  name: string;
+  file?: File | null;
+}
+export interface IDocumentAddForm {
+  name: string;
+  file?: File | null;
+}
+
 export interface IDocumentColumn {
   id: string;
   label: string;
@@ -15,5 +30,5 @@ export interface IDocumentColumn {
 }
 
 export interface ISearchDocumentForm {
-  name: string;
+  name?: string;
 }

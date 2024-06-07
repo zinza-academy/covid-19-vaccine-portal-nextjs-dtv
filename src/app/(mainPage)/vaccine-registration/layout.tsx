@@ -1,3 +1,4 @@
+'use client';
 import AppTitle from '@/components/base/AppTitle';
 import { Container, Stack, Typography } from '@mui/material';
 

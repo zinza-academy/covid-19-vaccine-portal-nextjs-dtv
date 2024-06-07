@@ -7,7 +7,10 @@ import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 import CloseIcon from '@mui/icons-material/Close';
-import { IEditInjectionPointForm } from '@/types/injection-point';
+import { IInjectionPointUpdate, IInjectionPointUpdateForm } from '@/types/injection-point';
+import { useUpdateVaccinationSitesMutation } from '@/api/vaccination-sites';
+import { QueryActionCreatorResult } from '@reduxjs/toolkit/query';
+import { QueryDefinition } from '@reduxjs/toolkit/query';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -21,31 +24,49 @@ const style = {
 const EditModal: React.FC<{
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({ open, setOpen }) => {
+  editData: IInjectionPointUpdate;
+  refetchData: () => QueryActionCreatorResult<QueryDefinition<any, any, any, any>>;
+}> = ({ open, setOpen, editData, refetchData }) => {
+  const [onUpdate, { isLoading }] = useUpdateVaccinationSitesMutation();
+
   const editInjectionPointSchema = yup.object().shape({
     name: yup.string().required('Require'),
-    street: yup.string().required('Require'),
-    leader: yup.string().required('Require'),
-    table_number: yup.number().required('Require')
+    manager: yup.string().required('Require'),
+    number_table: yup.number().required('Require')
   });
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isValid }
-  } = useForm<IEditInjectionPointForm>({
+  } = useForm<IInjectionPointUpdateForm>({
     mode: 'onChange',
     defaultValues: {
-      name: '',
-      street: '',
-      leader: '',
-      table_number: 0
+      name: 'name edit',
+      manager: editData.manager,
+      number_table: editData.number_table
     },
     resolver: yupResolver(editInjectionPointSchema)
   });
 
-  const onSubmit = async (values: IEditInjectionPointForm) => {
-    console.log('checkdate >>', values);
+  React.useEffect(() => {
+    reset({
+      name: editData.name,
+      manager: editData.manager,
+      number_table: editData.number_table
+    });
+  }, [editData, reset]);
+
+  const onSubmit = async (values: IInjectionPointUpdateForm) => {
+    try {
+      await onUpdate({
+        ...values,
+        id: editData.id
+      }).unwrap();
+      setOpen(false);
+      await refetchData();
+    } catch (error) {}
   };
 
   const onClose = () => setOpen(false);
@@ -92,28 +113,6 @@ const EditModal: React.FC<{
                   }}
                 />
               </Stack>
-              <Stack spacing={1}>
-                <FormLabel
-                  sx={{
-                    color: '#000'
-                  }}
-                >
-                  Địa chỉ
-                </FormLabel>
-                <TextField
-                  {...register('street')}
-                  id="street"
-                  type="text"
-                  placeholder="Địa chỉ"
-                  variant="outlined"
-                  error={!!errors.street?.message}
-                  helperText={errors.street?.message}
-                  size="small"
-                  sx={{
-                    width: '396px'
-                  }}
-                />
-              </Stack>
 
               <Stack spacing={1}>
                 <FormLabel
@@ -124,13 +123,13 @@ const EditModal: React.FC<{
                   Người đứng đầu cơ sở
                 </FormLabel>
                 <TextField
-                  {...register('leader')}
-                  id="leader"
+                  {...register('manager')}
+                  id="manager"
                   type="text"
                   placeholder="Người đứng đầu cơ sở"
                   variant="outlined"
-                  error={!!errors.leader?.message}
-                  helperText={errors.leader?.message}
+                  error={!!errors.manager?.message}
+                  helperText={errors.manager?.message}
                   size="small"
                   sx={{
                     width: '396px'
@@ -146,13 +145,13 @@ const EditModal: React.FC<{
                   Số bàn tiêm
                 </FormLabel>
                 <TextField
-                  {...register('table_number')}
-                  id="table_number"
-                  type="text"
+                  {...register('number_table')}
+                  id="number_table"
+                  type="number"
                   placeholder="Số bàn tiêm"
                   variant="outlined"
-                  error={!!errors.table_number?.message}
-                  helperText={errors.table_number?.message}
+                  error={!!errors.number_table?.message}
+                  helperText={errors.number_table?.message}
                   size="small"
                   sx={{
                     width: '396px'
@@ -186,7 +185,7 @@ const EditModal: React.FC<{
                   Hủy bỏ
                 </Button>
                 <Button
-                  disabled={!isValid}
+                  disabled={!isValid || isLoading}
                   type="submit"
                   variant="outlined"
                   sx={{

@@ -1,13 +1,21 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getCookie } from 'cookies-next';
+import { ACCESS_TOKEN } from '@/utils/constants';
 
 export default function middleware(req: NextRequest) {
   const res = NextResponse.next();
   const path = req.nextUrl.pathname;
-  const auth_token = getCookie('authorization', { req, res });
+  const auth_token = getCookie(ACCESS_TOKEN, { req, res });
 
-  const protectedRoutes = ['/profile'];
+  const protectedRoutes = [
+    '/profile',
+    '/vaccine-registration',
+    '/vaccine-certificate',
+    'vaccine-registration-result',
+    '/account',
+    '/admin'
+  ];
 
   if (!auth_token && protectedRoutes.includes(path)) {
     return NextResponse.redirect(new URL('/login', req.url));

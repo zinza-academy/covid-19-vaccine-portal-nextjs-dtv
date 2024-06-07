@@ -1,27 +1,27 @@
-import { IDistrictResponse, IProvinceResponse, IWardResponse } from '@/types/address';
+import { IDistrict, IProvince, IWard } from '@/types/address';
 import { fetchBaseQuery, createApi } from '@reduxjs/toolkit/query/react';
 
 export const addressApi = createApi({
   reducerPath: 'addressApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'https://vapi.vnappmob.com/api'
+    baseUrl: `${process.env.BASE_URL}`
   }),
   endpoints: (builder) => ({
-    fetchProvince: builder.query<IProvinceResponse, void>({
+    fetchProvince: builder.query<IProvince[], void>({
       query: () => ({
-        url: '/province',
+        url: '/provinces',
         method: 'GET'
       })
     }),
-    fetchDistrict: builder.query<IDistrictResponse, { provinceId: string | number }>({
-      query: ({ provinceId }) => ({
-        url: `/province/district/${provinceId}`,
+    fetchDistrict: builder.query<IDistrict[], { province_id: string | number }>({
+      query: ({ province_id }) => ({
+        url: `/provinces/${province_id}/districts`,
         method: 'GET'
       })
     }),
-    fetchWard: builder.query<IWardResponse, { districtId: string | number }>({
-      query: ({ districtId }) => ({
-        url: `province/ward/${districtId}`,
+    fetchWard: builder.query<IWard[], { district_id: string | number }>({
+      query: ({ district_id }) => ({
+        url: `/districts/${district_id}/wards`,
         method: 'GET'
       })
     })

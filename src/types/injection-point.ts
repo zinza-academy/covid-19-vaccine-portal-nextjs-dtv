@@ -2,7 +2,6 @@ import { IDistrict, IProvince, IWard } from '@/types/address';
 
 export interface ISearchInjectionPointForm {
   injectionPoint: string;
-  address: string;
 }
 
 export interface IInjectionPointColumn {
@@ -16,20 +15,40 @@ export interface IInjectionPoint {
   id: string | number;
   name: string;
   street: string;
-  ward?: IWard;
-  district?: IDistrict;
-  province?: IProvince;
-  leader: string;
-  table_number: number;
+  ward: IWard;
+  manager: string;
+  house_number?: number;
+  number_table: number;
 }
 
-export interface IEditInjectionPointForm {
-  id?: string | number;
+export interface ICreateInjectionPoint {
   name: string;
   street: string;
-  ward?: IWard;
-  district?: IDistrict;
-  province?: IProvince;
-  leader: string;
-  table_number: number;
+  ward_id: string;
+  manager: string;
+  house_number?: number | null;
+  number_table: number;
+}
+
+export interface ICreateInjectionPointForm {
+  name: string;
+  street: string;
+  manager: string;
+  house_number?: number | null;
+  number_table: number;
+  ward: string;
+  district: string;
+  province: string;
+}
+
+export interface IInjectionPointUpdate {
+  id: string | number;
+  name: string;
+  manager: string;
+  number_table: number;
+}
+export interface IInjectionPointUpdateForm {
+  name: string;
+  manager: string;
+  number_table: number;
 }

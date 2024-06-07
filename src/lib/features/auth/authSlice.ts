@@ -1,25 +1,31 @@
 import { setCookie, deleteCookie } from 'cookies-next';
 import { createSlice } from '@reduxjs/toolkit';
-import { ILoginResponse } from '@/types/auth';
+import { ILoginResponse, IUser } from '@/types/auth';
 import { authApi } from '@/api/auth';
 import { AppState } from '@/lib/store';
+import { ACCESS_TOKEN } from '@/utils/constants';
 
 const initialState: ILoginResponse = {
-  // id: '',
-  email: '',
   token: '',
-  userName: ''
+  refresh_token: '',
+  token_expires: 0,
+  user: {} as IUser
 };
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
-  reducers: {},
+  reducers: {
+    logout: () => {
+      deleteCookie(ACCESS_TOKEN);
+      return {} as any;
+    }
+  },
   extraReducers: (builder) => {
     builder.addMatcher(authApi.endpoints.login.matchFulfilled, (_state, { payload }) => {
       const expire = new Date().getTime() + 1000 * 24 * 60 * 60;
       // set the token in the cookies
-      setCookie('authorization', payload.token, {
+      setCookie(ACCESS_TOKEN, payload.token, {
         path: '/',
         expires: new Date(expire)
       });
@@ -29,5 +35,5 @@ const authSlice = createSlice({
 });
 
 export const selectAuthData = (state: AppState) => state.auth;
-
+export const { logout } = authSlice.actions;
 export default authSlice.reducer;

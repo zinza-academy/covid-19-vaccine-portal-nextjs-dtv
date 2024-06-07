@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import * as yup from 'yup';
 import { Controller, useForm } from 'react-hook-form';
 import { useFetchDistrictQuery, useFetchProvinceQuery, useFetchWardQuery } from '@/api/address';
@@ -14,9 +14,7 @@ import {
   Typography
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { InjectionPoints } from '@/mockData/ InjectionPoints';
 import { IProvinceForm } from '@/types/address';
-import { SearchVaccinationPoints } from '@/utils/SearchVaccinationPoints';
 import VaccinationPointTable, { Column } from '@/components/home/VaccinationPointTable';
 
 const columns: Column[] = [
@@ -26,12 +24,12 @@ const columns: Column[] = [
   { id: 'ward', label: 'Xã/Phường', align: 'center' },
   { id: 'district', label: 'Quận/Huyện', align: 'center' },
   { id: 'province', label: 'Tỉnh/Thành phố', align: 'center' },
-  { id: 'leader', label: 'Người đứng đầu cơ sở tiêm chủng', align: 'center' },
-  { id: 'table_number', label: 'Số bàn tiêm', align: 'center' }
+  { id: 'manager', label: 'Người đứng đầu cơ sở tiêm chủng', align: 'center' },
+  { id: 'number_table', label: 'Số bàn tiêm', align: 'center' }
 ];
 
 const VaccinationPoint: FC = () => {
-  const [injectionPointsData, setInjectionPointsData] = useState(InjectionPoints);
+  const [ward, setWard] = useState<string>('');
 
   const registerSchema = yup.object().shape({
     province: yup.string().required('Province is require'),
@@ -56,14 +54,14 @@ const VaccinationPoint: FC = () => {
   const watchDistrict = watch('district');
   const { data: provinces } = useFetchProvinceQuery();
   const { data: districts } = useFetchDistrictQuery({
-    provinceId: watchProvince
+    province_id: watchProvince
   });
-  const { data: wards, refetch: refetchWard } = useFetchWardQuery({
-    districtId: watchDistrict
+  const { data: wards } = useFetchWardQuery({
+    district_id: watchDistrict
   });
 
   const onSubmit = async (values: IProvinceForm) => {
-    setInjectionPointsData(SearchVaccinationPoints(InjectionPoints, values));
+    setWard(values.ward);
   };
 
   return (
@@ -105,9 +103,9 @@ const VaccinationPoint: FC = () => {
                     error={!!errors.province?.message}
                   >
                     {provinces &&
-                      provinces.results.map((province, index) => (
-                        <MenuItem key={index} value={province.province_id}>
-                          {province.province_name}
+                      provinces.map((province, index) => (
+                        <MenuItem key={province.id} value={province.id}>
+                          {province.name}
                         </MenuItem>
                       ))}
                   </Select>
@@ -127,9 +125,9 @@ const VaccinationPoint: FC = () => {
                     error={!!errors.district?.message}
                   >
                     {districts &&
-                      districts.results.map((district, index) => (
-                        <MenuItem key={index} value={district.district_id}>
-                          {district.district_name}
+                      districts.map((district, index) => (
+                        <MenuItem key={district.id} value={district.id}>
+                          {district.name}
                         </MenuItem>
                       ))}
                   </Select>
@@ -148,9 +146,9 @@ const VaccinationPoint: FC = () => {
                   <InputLabel id="demo-simple-select-label">Xã/Phường</InputLabel>
                   <Select id="ward" label="Xã/Phường" {...field} error={!!errors.province?.message}>
                     {wards &&
-                      wards.results.map((ward, index) => (
-                        <MenuItem key={index} value={ward.ward_id}>
-                          {ward.ward_name}
+                      wards.map((ward, index) => (
+                        <MenuItem key={ward.id} value={ward.id}>
+                          {ward.name}
                         </MenuItem>
                       ))}
                   </Select>
@@ -188,7 +186,7 @@ const VaccinationPoint: FC = () => {
             </Box>
           </Box>
         </Stack>
-        <VaccinationPointTable columns={columns} data={injectionPointsData} />
+        <VaccinationPointTable columns={columns} ward={ward} />
       </Box>
     </Box>
   );

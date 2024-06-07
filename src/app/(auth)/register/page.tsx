@@ -5,17 +5,15 @@ import {
   Button,
   FormControl,
   FormLabel,
-  InputLabel,
   MenuItem,
   Select,
   TextField,
   Typography,
-  FormHelperText
+  Alert,
+  Stack
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
 import { yupResolver } from '@hookform/resolvers/yup';
-import Link from 'next/link';
-import { useForm, Controller, useWatch, Control } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -23,14 +21,12 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { IUserRegisterForm } from '@/types/auth';
 import { useFetchDistrictQuery, useFetchProvinceQuery, useFetchWardQuery } from '@/api/address';
-import { useEffect } from 'react';
-import { IProvince } from '@/types/address';
+import { useRegisterMutation } from '@/api/auth';
+import { genders } from '@/utils/constants';
 
 export default function LoginPage() {
-  const router = useRouter();
-
   const registerSchema = yup.object().shape({
-    citizenID: yup
+    citizen_id: yup
       .string()
       .required('Citizen ID is require')
       .matches(/^\d{9}$|^\d{12}$/, 'Citizen ID must contain 9 or 12 digits'),
@@ -40,12 +36,12 @@ export default function LoginPage() {
       .required('Password is require')
       .min(8, 'Password must be at least 8 characters')
       .test('no-spaces', 'Password cannot contain spaces', (value) => !value.includes(' ')),
-    fullName: yup.string().required('Name is require'),
-    dateOfBirth: yup.mixed<Dayjs>().required('Date of birth is invalid'),
+    full_name: yup.string().required('Name is require'),
+    date_of_birth: yup.mixed<Dayjs>().required('Date of birth is invalid'),
     gender: yup.string().required('Gender is require'),
-    province: yup.string().required('Province is require'),
-    district: yup.string().required('District is require'),
-    ward: yup.string().required('Ward is require')
+    province_id: yup.string().required('Province is require'),
+    district_id: yup.string().required('District is require'),
+    ward_id: yup.string().required('Ward is require')
   });
   const {
     register,
@@ -56,31 +52,35 @@ export default function LoginPage() {
   } = useForm<IUserRegisterForm>({
     mode: 'onChange',
     defaultValues: {
-      citizenID: '',
+      citizen_id: '',
       email: '',
       password: '',
-      fullName: '',
-      dateOfBirth: dayjs(),
+      full_name: '',
+      date_of_birth: dayjs(),
       gender: '',
-      province: '',
-      district: '',
-      ward: ''
+      province_id: '',
+      district_id: '',
+      ward_id: ''
     },
     resolver: yupResolver(registerSchema)
   });
-  const watchProvince = watch('province');
-  const watchDistrict = watch('district');
+  const watchProvince = watch('province_id');
+  const watchDistrict = watch('district_id');
 
   const { data: provinces } = useFetchProvinceQuery();
   const { data: districts } = useFetchDistrictQuery({
-    provinceId: watchProvince
+    province_id: watchProvince
   });
   const { data: wards } = useFetchWardQuery({
-    districtId: watchDistrict
+    district_id: watchDistrict
   });
 
+  const [onRegister, { isLoading, isSuccess, error }] = useRegisterMutation();
+
   const onSubmit = async (values: IUserRegisterForm) => {
-    console.log('>>> Check data: ', values);
+    try {
+      await onRegister(values).unwrap();
+    } catch (error) {}
   };
   return (
     <Box
@@ -117,6 +117,17 @@ export default function LoginPage() {
           maxWidth: '400px'
         }}
       >
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error.message}
+          </Alert>
+        )}
+        {isSuccess && (
+          <Alert severity="success" sx={{ width: '100%' }}>
+            Successfully
+          </Alert>
+        )}
+
         <Box sx={{ width: '100%' }}>
           <FormLabel
             sx={{
@@ -130,13 +141,13 @@ export default function LoginPage() {
             Số CMND/CCCD
           </FormLabel>
           <TextField
-            {...register('citizenID')}
+            {...register('citizen_id')}
             id="citizenId"
             type="text"
             placeholder="Số CMND/CCCD"
             variant="outlined"
-            error={!!errors.citizenID?.message}
-            helperText={errors.citizenID?.message}
+            error={!!errors.citizen_id?.message}
+            helperText={errors.citizen_id?.message}
             sx={{
               width: '100%',
               marginTop: '6px'
@@ -208,13 +219,13 @@ export default function LoginPage() {
             Họ và tên
           </FormLabel>
           <TextField
-            {...register('fullName')}
+            {...register('full_name')}
             id="name"
             type="text"
             placeholder="Họ và tên"
             variant="outlined"
-            error={!!errors.fullName?.message}
-            helperText={errors.fullName?.message}
+            error={!!errors.full_name?.message}
+            helperText={errors.full_name?.message}
             sx={{
               width: '100%',
               marginTop: '6px'
@@ -234,7 +245,7 @@ export default function LoginPage() {
             Ngày sinh
           </FormLabel>
           <Controller
-            name="dateOfBirth"
+            name="date_of_birth"
             control={control}
             render={({ field, fieldState }) => (
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -244,32 +255,34 @@ export default function LoginPage() {
           />
         </Box>
 
-        <Box sx={{ width: '100%' }}>
-          <FormLabel
-            sx={{
-              color: '#000',
-              '&::after': {
-                content: '" (*)"',
-                color: 'red'
-              }
-            }}
-          >
-            Giới tính
-          </FormLabel>
-          <TextField
-            {...register('gender')}
-            id="date"
-            type="text"
-            placeholder="Giới tính"
-            variant="outlined"
-            error={!!errors.gender?.message}
-            helperText={errors.gender?.message}
-            sx={{
-              width: '100%',
-              marginTop: '6px'
-            }}
+        <Stack direction="column" spacing={1} width="100%">
+          <FormLabel sx={{ color: 'black' }}>Giới tính</FormLabel>
+          <Controller
+            control={control}
+            name="gender"
+            render={({ field }) => (
+              <FormControl>
+                <Select
+                  id="gender"
+                  {...field}
+                  error={!!errors.gender?.message}
+                  sx={{
+                    '& .MuiSelect-select .notranslate::after': {
+                      content: `"Giới tính"`,
+                      opacity: 0.42
+                    }
+                  }}
+                >
+                  {genders.map((item) => (
+                    <MenuItem key={item.id} value={item.value}>
+                      {item.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
           />
-        </Box>
+        </Stack>
         <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
           <FormLabel
             sx={{
@@ -284,14 +297,14 @@ export default function LoginPage() {
           </FormLabel>
           <Controller
             control={control}
-            name="province"
+            name="province_id"
             render={({ field }) => (
               <FormControl>
-                <Select id="city" {...field} error={!!errors.province?.message}>
+                <Select id="city" {...field} error={!!errors.province_id?.message}>
                   {provinces &&
-                    provinces.results.map((province) => (
-                      <MenuItem key={province.province_id} value={province.province_id}>
-                        {province.province_name}
+                    provinces.map((province) => (
+                      <MenuItem key={province.id} value={province.id}>
+                        {province.name}
                       </MenuItem>
                     ))}
                 </Select>
@@ -313,14 +326,14 @@ export default function LoginPage() {
           </FormLabel>
           <Controller
             control={control}
-            name="district"
+            name="district_id"
             render={({ field }) => (
               <FormControl>
-                <Select id="city" {...field} error={!!errors.province?.message}>
+                <Select id="city" {...field} error={!!errors.province_id?.message}>
                   {districts &&
-                    districts.results.map((district) => (
-                      <MenuItem key={district.district_id} value={district.district_id}>
-                        {district.district_name}
+                    districts.map((district) => (
+                      <MenuItem key={district.id} value={district.id}>
+                        {district.name}
                       </MenuItem>
                     ))}
                 </Select>
@@ -342,14 +355,14 @@ export default function LoginPage() {
           </FormLabel>
           <Controller
             control={control}
-            name="ward"
+            name="ward_id"
             render={({ field }) => (
               <FormControl>
-                <Select id="ward" {...field} error={!!errors.province?.message}>
+                <Select id="ward" {...field} error={!!errors.ward_id?.message}>
                   {wards &&
-                    wards.results.map((ward) => (
-                      <MenuItem key={ward.ward_id} value={ward.ward_id}>
-                        {ward.ward_name}
+                    wards.map((ward) => (
+                      <MenuItem key={ward.id} value={ward.id}>
+                        {ward.name}
                       </MenuItem>
                     ))}
                 </Select>
@@ -366,14 +379,14 @@ export default function LoginPage() {
           }}
         >
           <Button
-            disabled={!isValid}
+            disabled={!isValid || isLoading}
             type="submit"
             variant="outlined"
             sx={{
               color: 'blue'
             }}
           >
-            Tiếp tục
+            {isLoading ? 'Loading...' : 'Tiếp tục'}
           </Button>
         </Box>
       </Box>

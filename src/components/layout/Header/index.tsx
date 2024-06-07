@@ -58,7 +58,8 @@ const Header: FC = () => {
     },
     {
       id: 4,
-      title: 'Tài liệu'
+      title: 'Tài liệu',
+      path: '/document'
     }
   ];
   return (
@@ -84,12 +85,16 @@ const Header: FC = () => {
           </Stack>
           <Stack direction="row" spacing={2} alignItems={'center'} height={'50px'}>
             {menuItems &&
-              menuItems.map((item) => {
+              menuItems.map((item, index) => {
                 if (item.subMenuItems) {
-                  return <DropdownMenu {...item} />;
+                  return <DropdownMenu key={index} {...item} />;
                 }
                 return (
-                  <Link href={item.path ? item.path : ''} style={{ textDecoration: 'none' }}>
+                  <Link
+                    href={item.path ? item.path : ''}
+                    key={index}
+                    style={{ textDecoration: 'none' }}
+                  >
                     <Stack direction={'row'} key={item.id} color={'#fff'}>
                       <Typography fontSize={'15px'}>{item.title}</Typography>
                       {item.rightIcon}

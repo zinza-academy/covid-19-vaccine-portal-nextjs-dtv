@@ -18,8 +18,7 @@ export interface IEditVaccineRegistrationForm {
 }
 
 export interface ISearchVaccineRegistrationForm {
-  fullName: string;
-  hic: string;
+  hic?: string | null;
 }
 
 export enum VaccineRegistrationStatus {
